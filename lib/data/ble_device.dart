@@ -5,12 +5,10 @@ class BleDevice {
   final int rssi;
 
   BleDevice({
-    required String name,
+    required this.name,
     required this.macAddress,
     required this.rssi,
-  }) {
-    this.name = name.isEmpty ? 'N/A' : name;
-  }
+  });
 
   @override
   bool operator ==(Object other) =>

@@ -42,6 +42,7 @@ class ScanningScreenBloc extends Cubit<ScanningScreenState> {
   final Set<BleDevice> _scanned = {};
   StreamSubscription? _scanningSubscription;
   StreamSubscription? _adapterStateSubscription;
+  BluetoothAdapterState? _bluetoothAdapterState;
 
   ScanningScreenBloc() : super(LoadingScanningScreenState()) {
     _init();
@@ -55,20 +56,26 @@ class ScanningScreenBloc extends Cubit<ScanningScreenState> {
     }
 
     if (Platform.isAndroid) {
-      await FlutterBluePlus.turnOn();
+      FlutterBluePlus.turnOn();
     }
 
-    FlutterBluePlus.adapterState.listen((BluetoothAdapterState state) {
-      print('BluetoothAdapterState is $state');
-      if (state == BluetoothAdapterState.on) {
+    FlutterBluePlus.adapterState.listen((BluetoothAdapterState adapterState) {
+      _bluetoothAdapterState = adapterState;
+      if (adapterState == BluetoothAdapterState.on) {
         emit(ScanningIsStoppedScreenState());
       } else {
+        if (FlutterBluePlus.isScanningNow) {
+          FlutterBluePlus.stopScan();
+        }
         emit(BtIsNotAvailableScreenState());
       }
     });
 
     _scanningSubscription = FlutterBluePlus.scanResults.listen(
       (results) {
+        if (!FlutterBluePlus.isScanningNow) {
+          return;
+        }
         _scanned.clear();
         emit(LoadingScanningScreenState());
         for (final el in results) {
@@ -80,11 +87,16 @@ class ScanningScreenBloc extends Cubit<ScanningScreenState> {
         }
         emit(ScanningIsRunningScreenState(_scanned));
       },
-      onError: (e) => print(e),
+      onError: (e) => emit(FailureScanningScreenState(e.toString())),
     );
   }
 
   void start() async {
+    if (_bluetoothAdapterState != BluetoothAdapterState.on) {
+      if (Platform.isAndroid) {
+        await FlutterBluePlus.turnOn();
+      }
+    }
     await FlutterBluePlus.startScan();
   }
 

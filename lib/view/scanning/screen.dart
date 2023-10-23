@@ -24,7 +24,9 @@ class _ScanningScreenState extends State<ScanningScreen> {
               _AppBarButton(
                 icon: Icons.not_started,
                 color: Colors.green,
-                isActive: state is ScanningIsStoppedScreenState,
+                isActive: state is ScanningIsStoppedScreenState ||
+                    state is BtIsNotAvailableScreenState ||
+                    state is FailureScanningScreenState,
                 onTap: context.read<ScanningScreenBloc>().start,
               ),
               _AppBarButton(
@@ -129,7 +131,7 @@ class _DeviceListItem extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(data.name),
+              Text(data.name.isEmpty ? 'N/A' : data.name),
               Text(data.macAddress),
             ],
           ),
