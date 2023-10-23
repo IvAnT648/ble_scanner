@@ -20,7 +20,6 @@ class BleApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
       ),
-      debugShowCheckedModeBanner: false,
       home: BlocProvider<ScanningScreenBloc>(
         create: (_) => ScanningScreenBloc(),
         child: const ScanningScreen(),
